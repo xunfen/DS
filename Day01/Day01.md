@@ -80,3 +80,166 @@ L.data[L.last - 1];
                头节点              节点1              节点2              节点3              终端节点
 
 ```
+此时，我们仍然假设数据元素的类型为datatytpe，那么单链表结构定义如下：
+```
+typedef struct node * pointer;
+struct node
+{
+    datatype data;              //data是节点数据域
+    pointer next;               //next是节点指针域
+};
+typedef pointer lklist;
+```
+但是这样子看起来似乎不是很清水，此处我们给出C语言中的单链表结构定义：
+```C
+struct node                 
+{
+    int data;              
+    struct node *next;    
+}
+int length = 0;
+```
+在上面这段代码中定义了一个node的结构体类型
+data是节点数据域
+next是节点指针域
+
+随后我们将演示如何建立链表以及对链表的一些基本操作
+
+#### 1. 初始化链表
+```C
+struct node *head;
+head = NULL;
+```
+在上面这俩行代码中，我们定义了一个头指针变量head，并初始化为NULL，表示此时链表为空
+
+#### 2. 创建第一个节点
+```C
+struct node *p;
+p = (struct node *)malloc(sizeof(struct node));
+```
+在上面俩号代码中，我们先声明了node类型的指针变量p
+随后我们使用malloc申请了一个内存空间，他的大小是xize参数为sizeof(struct node)，即申请一个node结构体的大小的空间
+同时，我们知道malloc申请的内存空间是一个无类型的，也就是返回一个void*的指针，因此，我们使用强制类型转换将void*转换为node*，并且将其赋给p
+```C
+scanf ("%d", &p->data);
+p->next = NULL;
+head = p;
+length++;
+```
+此处，我们从键盘得到一个数据，我们将他储存于p->data即节点数据域中
+同时，将p->next指向NULL，表示此时p是链表的第一个节点，并且p是链表的终端节点
+最后，将head指向p，表示此时链表头指针head指向第一个节点p
+
+#### 3. 创建第二个节点
+```C
+struct  node *q;
+q = (struct node *)malloc(sizeof(struct node));
+scanf ("%d", &q->data);
+q->next = NULL;
+p->next = q;
+length++;
+```
+在上面这段代码中，我们的操作与创建第一个节点大致相同，但是不一样的是，这里我们为了方便演示，使用的是p和q俩个不同的变量，这一点是不规范的，倘若我们要创建几百个节点，变量名远远不够，所以将会在此markdown后的Demo中给出一个较为标准的写法
+对上方代码的解释如下：
+首先创建一个node*类型的指针变量q
+创建一个内存空间，大小为sizeof(struct node)，并强制类型转换将其转换为node*，将其赋给q
+从键盘得到数据，将数据储存于q->data中
+将q->next指向NULL，表示此时q是链表的终端节点
+将p->next指向q，表示此时p是链表的第一个节点，并且p的next域指向q，表示p和q是相邻的
+
+#### 5. 链表数据的获取
+对于数据的获取，我觉得应当加一个length参数，表示链表的长度，这样，我们就可以遍历整个链表，获取其中的数据，同时获取数据时可以避免越界问题，所以此时我们将对上方代码加上length参数，但是按照从上往下顺序阅读上方并没没有任何对length的说明，故此处做说明
+##### 5.1 单数据的获取
+获取头元素
+```C
+struct node *index;
+index = head;
+if (index == NULL) {
+    printf("链表为空！\n");
+} else {
+    printf("链表数据为：%d\n", index->data);
+}
+```
+获取链表中任意长度的元素
+```C
+//首先为了避免冲突，我们事先规定我们的链表中存储的都是int类型的数据
+struct node *index;
+index = head;
+int target = 2;//此处我们设置我们要获取到链表第二个er个节点的数据
+
+for (int i = 1; i <= target; i++) {
+    index = index->next;//移动到下一个节点
+}
+
+printf("链表数据为：%d\n", index->data);
+```
+
+##### 5.2 遍历链表
+遍历链表，获取所有数据
+```C
+struct node *index;
+index = head;
+while (index != NULL) {
+    printf("链表数据为：%d\n", index->data);
+    index = index->next;
+}
+```
+或者使用我们事先定义好的length
+```C
+struct node *index;
+index = head;
+for (int i = 1; i <= length; i++) {
+    printf("链表数据为：%d\n", index->data);
+    index = index->next;
+}
+```
+#### 6. 链表数据的插入
+此处我们假设要将元素“3”插入到链表第2个位置上
+```C
+// 将元素"3"插入到链表第2个位置上
+struct node *index;
+index = head;
+int data = 3;
+int target = 2;
+struct node *targetNext;
+
+// 移动到插入位置的前一个节点
+for (int i = 1; i < target; i++) {
+    index = index->next;
+}
+
+// 保存原节点的next域
+targetNext = index->next;
+
+// 创建新节点并插入
+struct node *newNode;
+newNode = (struct node *)malloc(sizeof(struct node));
+newNode->data = data;
+newNode->next = targetNext;
+index->next = newNode;
+length++;
+```
+*(为什么我越写越晕)*
+
+#### 7. 链表数据的删除与清空
+##### 7.1 删除数据
+```C
+struct node *index;
+index = head;
+int target = 2;//目标是删除链表第2个节点
+for (int i = 1; i <= target - 1; i++) {
+    index = index->next;
+}
+struct node *targetNext;
+targetNext = index->next;
+length--;
+```
+删除数据时，我们首先将index移动到目标节点的前一个节点，然后，将index的next域指向目标节点的next域，即index的next域指向目标节点的next域的next域，这样，我们就删除了目标节点
+
+##### 7.2 清空链表
+```C
+length = 0;
+head = NULL;
+```
+清空链表时，我们直接将head指向NULL，表示此时链表为空
+
